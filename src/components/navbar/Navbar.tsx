@@ -1,6 +1,22 @@
-import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
 
 function Navbar() {
+  
+   //Objeto responsavel por redirecionar o usuário para uma outra rota
+    const navigate = useNavigate();
+
+     //Consumo do Contexto AuthContext (Usamos desestruturação para selecionar apenas o que precisamos)
+        const { handleLogout} = useContext(AuthContext);
+
+        function logout() {
+          handleLogout();
+          alert('O usuário foi desconectado com sucesso!');
+          navigate("/")
+        }
+  
+  
   return (
     <>
       <div className="w-full flex justify-center py-4 bg-amber-800 text-white">
@@ -14,12 +30,15 @@ function Navbar() {
             Temas 
             Cadastrar tema 
             Perfil 
+            <Link to='' onClick={logout} className="hover:underline">
             Sair
+            </Link>
+            
           </div>
         </div>
       </div>
     </>
-  );
+  )
 }
 
 export default Navbar;
