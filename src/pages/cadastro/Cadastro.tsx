@@ -80,6 +80,7 @@ function Cadastro() {
     navigate("/");
   }
 
+  //apenas para visualização no console
   console.log(JSON.stringify(usuario));
   console.log(confirmarSenha);
 
