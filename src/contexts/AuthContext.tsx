@@ -1,66 +1,86 @@
-import { createContext, useState, type ReactNode } from "react";
+import { createContext, useRef, useState, type ReactNode } from "react";
 import type UsuarioLogin from "../models/UsuarioLogin";
 import { login } from "../services/Service";
+import { ToastAlerta } from "../pages/utils/ToastAlerta";
 
-interface AuthContextProps {
-  usuario: UsuarioLogin;
-  handleLogout(): void;
-  handleLogin(usuario: UsuarioLogin): Promise<void>;
-  isLoading: boolean;
+
+// Todos os estados e funções que serão compartilhadas
+// com toda a minha aplicação
+interface AuthContextProps{
+  usuario: UsuarioLogin
+  handleLogout(): void
+  handleLogin(usuario: UsuarioLogin): Promise<void>
+  isLoading: boolean
+  isLogout: boolean
 }
 
-interface AuthProviderProps {
-  children: ReactNode;
+// Quem irá consumir o meu provedor
+interface AuthProviderProps{
+  children: ReactNode
 }
 
-export const AuthContext = createContext({} as AuthContextProps);
+// Criar o meu contexto com a tipagem AuthContextProps
+// O meu contexto irá disponibilizar os estados e funções do tipo AuthContextProps
+export const AuthContext = createContext({} as AuthContextProps)
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  //Inicializar o estado usuario(armazena os dados do usuario)
+// Inicializar os estados e implementar as funções dentro do provedor
+export function AuthProvider({ children }: AuthProviderProps){
 
+  // Inicializar o estado usuario (armazenar os dados do usuário autenticado)
   const [usuario, setUsuario] = useState<UsuarioLogin>({
     id: 0,
     nome: "",
     usuario: "",
     senha: "",
     foto: "",
-    token: "",
+    token: ""
   });
 
-  // Inicializar o estado isLoading ( controla o loader do componente login)
+  // Inicializar o estado isLoading (controlar o loader do componente Login)
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  //implementação da função login
+  //UseRef - Sinaliza se o logout foi feito pelo usuário (opção Sair)
+  const isLogout=useRef(false)//Imune a renderização
 
-  async function handleLogin(usuarioLogin: UsuarioLogin) {
+  // Implementação da função de Login
+  async function handleLogin(usuarioLogin: UsuarioLogin){
+
     setIsLoading(true);
 
-    try {
-      await login("/usuarios/logar", usuarioLogin, setUsuario);
-      alert("Usuario autenticado com sucesso!");
-    } catch (error) {
-      alert("Os dados do Usuário estão inconsistentes!");
+    try{
+        await login('/usuarios/logar', usuarioLogin, setUsuario);
+        ToastAlerta('Usuário autenticado com sucesso!', 'sucesso');
+
+        // Define isLogout como false para aguardar a saída via logout do usuário
+        isLogout.current=false
+
+    }catch(error){
+        ToastAlerta('Os dados do Usuário estão inconsistentes!', 'erro');
     }
+
     setIsLoading(false);
   }
 
   // Implementação da função de Logout
-  function handleLogout() {
+  function handleLogout(){
+
+    // Define isLogout como true para sinalizar que o usuário fez o logout
+    isLogout.current=true
+
     setUsuario({
       id: 0,
       nome: "",
       usuario: "",
       senha: "",
       foto: "",
-      token: "",
-    });
+      token: ""
+    })
   }
 
-  return (
-    <AuthContext.Provider
-      value={{ usuario, handleLogin, handleLogout, isLoading }}
-    >
+  return(
+    <AuthContext.Provider value={{ usuario, handleLogin, handleLogout, isLoading, isLogout: isLogout.current}}>
       {children}
     </AuthContext.Provider>
   )
+
 }

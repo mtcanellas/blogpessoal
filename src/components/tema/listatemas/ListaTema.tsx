@@ -1,10 +1,11 @@
-import { useFetcher, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CardTema from "../cardtema/Cardtema";
 import { useContext, useEffect, useState } from "react";
 import type Tema from "../../../models/Tema";
 import { AuthContext } from "../../../contexts/AuthContext";
 import { buscar } from "../../../services/Service";
 import { SyncLoader } from "react-spinners";
+import { ToastAlerta } from "../../../pages/utils/ToastAlerta";
 
 function ListaTemas() {
   // Objeto responsável por redirecionar o usuário para uma outra rota
@@ -26,7 +27,7 @@ function ListaTemas() {
 
   useEffect ( ()=> {
     if(token=== ""){
-      alert ('Você precisa estar logado!');
+      ToastAlerta('Você precisa estar logado!', 'error');
       navigate('/')
     }
   },[token])
